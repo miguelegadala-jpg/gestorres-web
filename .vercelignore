@@ -1,0 +1,5 @@
+src/
+logo/
+*.py
+*.md
+artifact.html
