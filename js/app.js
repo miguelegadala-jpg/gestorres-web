@@ -226,11 +226,8 @@
       var clamp = function (v) { return v < 0 ? 0 : v > 1 ? 1 : v; };
       var seg = function (p, a, b) { return clamp((p - a) / (b - a)); };
       var inOut = function (t) { return t < .5 ? 4 * t * t * t : 1 - Math.pow(-2 * t + 2, 3) / 2; };
-      var iTick = false, iDone = false, grow = [.55, .35, .75];
-      var introFrame = function () {
-        iTick = false;
-        var total = intro.offsetHeight - window.innerHeight; if (total <= 0) return;
-        var p = clamp(-intro.getBoundingClientRect().top / total);
+      var iDone = false, grow = [.55, .35, .75];
+      var introFrame = function (p) {
         var lr = iLogo.getBoundingClientRect();
         // 1) El nombre sube primero y se acomoda donde va el logo del menú; las letras hacen una ola al subir
         var m = inOut(seg(p, 0, .3)), br = iBrand ? iBrand.getBoundingClientRect() : null;
@@ -265,39 +262,51 @@
         });
         var o = seg(p, .68, 1);
         root.classList.toggle("intro-scrolled", p > .02);
-        if (iHero) iHero.style.transform = p < 1 ? "translate3d(0," + ((p - 1) * total).toFixed(1) + "px,0) scale(" + (1 + (1 - inOut(o)) * .08).toFixed(4) + ")" : "";
+        if (iHero) iHero.style.transform = p < 1 ? "scale(" + (1 + (1 - inOut(o)) * .08).toFixed(4) + ")" : "";
         root.classList.toggle("intro-active", p < .74);
         if (p > .72 && !iDone) { iDone = true; root.classList.add("intro-done"); }
         iStage.style.visibility = p >= .999 ? "hidden" : "";
       };
-      // Al terminar, la intro se retira del documento: ya no se puede volver a ver subiendo
-      var introClosed = false;
+      // La intro ya no sigue al scroll: el primer gesto hacia abajo la reproduce completa, con ritmo fijo y fluido
+      var DUR = 2400, playing = false, introClosed = false;
       var closeIntro = function () {
         if (introClosed) return; introClosed = true;
-        window.removeEventListener("scroll", introReq); window.removeEventListener("resize", introReq);
-        var before = iHero ? iHero.getBoundingClientRect().top : 0;
+        window.removeEventListener("wheel", onWheel); window.removeEventListener("keydown", onKey);
+        window.removeEventListener("touchstart", onTouchStart); window.removeEventListener("touchmove", onTouchMove);
         intro.parentNode.removeChild(intro);
         if (iHero) iHero.style.transform = "";
-        root.classList.remove("has-intro", "intro-active", "intro-scrolled");
+        root.classList.remove("has-intro", "intro-active", "intro-scrolled", "intro-lock");
         root.classList.add("intro-done");
-        var after = iHero ? iHero.getBoundingClientRect().top : 0;
-        window.scrollTo({ top: Math.max(0, window.scrollY + (after - before)), left: 0, behavior: "instant" });
+        window.scrollTo(0, 0);
       };
-      var introReq = function () {
-        if (introClosed) return;
-        var total = intro.offsetHeight - window.innerHeight;
-        if (total > 0 && -intro.getBoundingClientRect().top >= total - 1) { introFrame(); closeIntro(); return; }
-        if (!iTick) { iTick = true; requestAnimationFrame(introFrame); }
+      var play = function () {
+        if (playing) return; playing = true;
+        var t0 = null;
+        var step = function (t) {
+          if (t0 === null) t0 = t;
+          var p = clamp((t - t0) / DUR);
+          introFrame(p);
+          if (p < 1) requestAnimationFrame(step); else closeIntro();
+        };
+        requestAnimationFrame(step);
       };
-      // El botón "Desliza para entrar" lleva directo a la portada
-      if (iHint) iHint.addEventListener("click", function (e) {
-        e.preventDefault(); e.stopPropagation();
-        var total = intro.offsetHeight - window.innerHeight;
-        window.scrollTo({ top: total, behavior: "smooth" });
-      }, true);
-      window.addEventListener("scroll", introReq, { passive: true });
-      window.addEventListener("resize", introReq);
-      introFrame();
+      var onWheel = function (e) { if (!introClosed) e.preventDefault(); if (e.deltaY > 0) play(); };
+      var onKey = function (e) {
+        if (["ArrowDown", "PageDown", "End", " ", "Spacebar", "Enter"].indexOf(e.key) > -1) { e.preventDefault(); play(); }
+      };
+      var ty0 = null;
+      var onTouchStart = function (e) { ty0 = e.touches[0].clientY; };
+      var onTouchMove = function (e) {
+        if (!introClosed) e.preventDefault();
+        if (ty0 !== null && ty0 - e.touches[0].clientY > 12) play();
+      };
+      root.classList.add("intro-lock");
+      window.addEventListener("wheel", onWheel, { passive: false });
+      window.addEventListener("keydown", onKey);
+      window.addEventListener("touchstart", onTouchStart, { passive: true });
+      window.addEventListener("touchmove", onTouchMove, { passive: false });
+      if (iHint) iHint.addEventListener("click", function (e) { e.preventDefault(); e.stopPropagation(); play(); }, true);
+      introFrame(0);
     }
   }
 

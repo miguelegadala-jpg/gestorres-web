@@ -909,7 +909,9 @@ main, .site-footer { transition: opacity .2s ease, transform .2s ease; }
 @keyframes hintDrop { to { top: 100%; } }
 
 /* Con movimiento: escena fija mientras se hace scroll */
-.has-intro .intro { height: 250svh; }
+.has-intro .intro { height: 100svh; }
+.intro-lock, .intro-lock body { overflow: hidden; overscroll-behavior: none; }
+.intro-towers, .intro-mark, .intro-strips span { will-change: transform; }
 .has-intro .intro-stage { position: sticky; top: 0; }
 .has-intro .site-header { position: fixed; left: 0; right: 0; top: 0; }
 .has-intro .hero2 { position: relative; z-index: 1; margin-top: calc(-100svh + var(--header-h)); }
