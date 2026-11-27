@@ -2,6 +2,23 @@
   "cleanUrls": true,
   "trailingSlash": false,
   "headers": [
-    { "source": "/(img|css|js)/(.*)", "headers": [{ "key": "Cache-Control", "value": "public, max-age=604800" }] }
+    {
+      "source": "/(css|js)/(.*)",
+      "headers": [
+        {
+          "key": "Cache-Control",
+          "value": "public, max-age=0, must-revalidate"
+        }
+      ]
+    },
+    {
+      "source": "/img/(.*)",
+      "headers": [
+        {
+          "key": "Cache-Control",
+          "value": "public, max-age=604800"
+        }
+      ]
+    }
   ]
 }

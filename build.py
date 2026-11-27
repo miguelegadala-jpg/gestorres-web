@@ -1,4 +1,4 @@
-import json, pathlib
+import json, pathlib, hashlib
 B = pathlib.Path(__file__).parent
 body = (B/'src/sprite.html').read_text() + '\n' + (B/'src/main.html').read_text()
 title = "Gestorres · Administración de torres y condominios en Santo Domingo"
@@ -17,8 +17,10 @@ meta = f'''<meta name="description" content="{desc}">
 <meta property="og:image" content="https://gestorres.com.do/img/bg-cielo.webp">
 <meta property="og:locale" content="es_DO">
 <script type="application/ld+json">{json.dumps(ld, ensure_ascii=False)}</script>'''
-scripts = '''<script src="js/app.js" defer></script>
-<script src="js/i18n.js" defer></script>'''
+# Versión de css/js según su contenido: el navegador descarga la nueva en cuanto cambia
+V = hashlib.sha1(b''.join((B/f).read_bytes() for f in ('css/styles.css','js/app.js','js/i18n.js'))).hexdigest()[:10]
+scripts = f'''<script src="js/app.js?v={V}" defer></script>
+<script src="js/i18n.js?v={V}" defer></script>'''
 
 full = f'''<!doctype html>
 <html lang="es-DO">
@@ -31,7 +33,7 @@ full = f'''<!doctype html>
 <link rel="icon" href="img/logo-gestorres.svg">
 {fonts}
 <link rel="preload" as="image" href="img/logo-gestorres.svg">
-<link rel="stylesheet" href="css/styles.css">
+<link rel="stylesheet" href="css/styles.css?v={V}">
 </head>
 <body>
 {body}
@@ -45,7 +47,7 @@ artifact = f'''<title>Gestorres Web</title>
 <meta name="claude:viewport-fit-sides" content="cover">
 {meta}
 {fonts}
-<link rel="stylesheet" href="css/styles.css">
+<link rel="stylesheet" href="css/styles.css?v={V}">
 <script>document.documentElement.lang="es-DO";</script>
 {body}
 {scripts}
@@ -84,7 +86,7 @@ for slug, path, ptitle, pdesc in PAGES:
 <link rel="canonical" href="https://gestorres.com.do/{slug}.html">
 <link rel="icon" href="img/logo-gestorres.svg">
 {fonts}
-<link rel="stylesheet" href="css/styles.css">
+<link rel="stylesheet" href="css/styles.css?v={V}">
 <style>html,body{{margin:0;background:#fff}}</style>
 </head>
 <body class="page-{slug}">
