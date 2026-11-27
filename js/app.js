@@ -217,6 +217,9 @@
     if (skipIntro) intro.parentNode.removeChild(intro);
     else if (root.classList.contains("anim")) {
       root.classList.add("has-intro", "intro-active");
+      // Al recargar, el navegador no recuerda la posición: la intro siempre empieza desde arriba
+      try { history.scrollRestoration = "manual"; } catch (e) {}
+      window.scrollTo(0, 0);
       var iTowers = $(".intro-towers", intro), iMark = $(".intro-mark", intro), iLogo = $(".intro-logo", intro),
           iBg = $(".intro-bg", intro), iHint = $(".intro-hint", intro), iStage = $(".intro-stage", intro),
           iTw = $$(".tw", intro), iBrand = $(".site-header .brand img"), iHero = $(".hero2"), iStrips = $$(".intro-strips span", intro), iLetters = $$(".il", intro), iTag = $(".it", intro), iBand = $(".intro-band", intro);
