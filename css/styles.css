@@ -965,3 +965,6 @@ main, .site-footer { transition: opacity .2s ease, transform .2s ease; }
 
 /* Navegación interna hacia la portada: sin intro */
 .no-intro .intro { display: none !important; }
+
+/* Frase de arriba del título de la portada, más grande */
+.hero .kicker { font-size: clamp(1.05rem, .85rem + .55vw, 1.32rem); margin-bottom: 18px; }
