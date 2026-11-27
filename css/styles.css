@@ -966,7 +966,7 @@ main, .site-footer { transition: opacity .2s ease, transform .2s ease; }
 /* Títulos con efecto de máquina de escribir */
 .anim .hero h1:not(.tw-go), .anim .page-hero h1:not(.tw-go), .anim main h2:not(.tw-go) { visibility: hidden; }
 .anim .hero h1 .ln > span, .anim .page-hero h1 { animation: none !important; opacity: 1 !important; transform: none !important; clip-path: none !important; }
-.tw-rest { visibility: hidden; }
+.tw-rest { opacity: .2; }
 .tw-caret { border-left: 3px solid var(--blue); margin-right: -3px; animation: twBlink 1s steps(1) infinite; }
 .tw-typing .tw-caret { animation: none; }
 @keyframes twBlink { 50% { opacity: 0; } }
