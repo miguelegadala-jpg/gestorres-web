@@ -107,6 +107,11 @@
         }
       });
     }, { threshold: 0.12, rootMargin: "0px 0px -6% 0px" });
+    // Los títulos de sección entran como el de la portada: de arriba hacia abajo, al aparecer en pantalla
+    var tio2 = new IntersectionObserver(function (es) {
+      es.forEach(function (e) { if (e.isIntersecting) { e.target.classList.add("t-in"); tio2.unobserve(e.target); } });
+    }, { threshold: 0.35, rootMargin: "0px 0px -8% 0px" });
+    $$("main h2").forEach(function (h) { if (h.closest(".hero")) return; h.classList.add("t-up"); tio2.observe(h); });
     groups.forEach(function (g) {
       $$(g[0]).forEach(function (el, i) {
         if (el.closest(".hero")) return;
