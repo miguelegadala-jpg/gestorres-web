@@ -963,7 +963,11 @@ main, .site-footer { transition: opacity .2s ease, transform .2s ease; }
 .intro-band { position: fixed; left: 0; right: 0; top: 0; height: var(--header-h); opacity: 0; pointer-events: none;
   background: rgba(248,250,252,.86); -webkit-backdrop-filter: blur(14px); backdrop-filter: blur(14px); box-shadow: 0 6px 24px rgba(24,32,63,.06); }
 
-/* Títulos de sección: misma entrada que el título de la portada */
-.anim h2.t-up { opacity: 0; }
-.anim h2.t-up.t-in { animation: titleUp 1s cubic-bezier(.2,.7,.2,1) forwards; }
-@media (prefers-reduced-motion: reduce) { .anim h2.t-up { opacity: 1; animation: none; } }
+/* Títulos con efecto de máquina de escribir */
+.anim .hero h1:not(.tw-go), .anim .page-hero h1:not(.tw-go), .anim main h2:not(.tw-go) { visibility: hidden; }
+.anim .hero h1 .ln > span, .anim .page-hero h1 { animation: none !important; opacity: 1 !important; transform: none !important; clip-path: none !important; }
+.tw-rest { visibility: hidden; }
+.tw-caret { border-left: 3px solid var(--blue); margin-right: -3px; animation: twBlink 1s steps(1) infinite; }
+.tw-typing .tw-caret { animation: none; }
+@keyframes twBlink { 50% { opacity: 0; } }
+@media (prefers-reduced-motion: reduce) { .tw-caret { display: none; } }

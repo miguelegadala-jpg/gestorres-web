@@ -107,11 +107,6 @@
         }
       });
     }, { threshold: 0.12, rootMargin: "0px 0px -6% 0px" });
-    // Los títulos de sección entran como el de la portada: de arriba hacia abajo, al aparecer en pantalla
-    var tio2 = new IntersectionObserver(function (es) {
-      es.forEach(function (e) { if (e.isIntersecting) { e.target.classList.add("t-in"); tio2.unobserve(e.target); } });
-    }, { threshold: 0.35, rootMargin: "0px 0px -8% 0px" });
-    $$("main h2").forEach(function (h) { if (h.closest(".hero")) return; h.classList.add("t-up"); tio2.observe(h); });
     groups.forEach(function (g) {
       $$(g[0]).forEach(function (el, i) {
         if (el.closest(".hero")) return;
@@ -215,6 +210,70 @@
       });
     });
   }
+
+  /* ---------------- Títulos con efecto de máquina de escribir ---------------- */
+  // Se escribe letra por letra sin cambiar el texto final: los nodos de texto originales se conservan
+  // (así el selector de idioma sigue funcionando) y el resto reserva su espacio para que nada salte.
+  if (root.classList.contains("anim") && "IntersectionObserver" in window) {
+    var typing = [];
+    var typeTitle = function (h) {
+      var walker = document.createTreeWalker(h, NodeFilter.SHOW_TEXT, null), nodes = [], n;
+      while ((n = walker.nextNode())) if (n.nodeValue.length) nodes.push({ node: n, full: n.nodeValue });
+      var total = 0; nodes.forEach(function (o) { total += o.full.length; });
+      if (!total) { h.classList.add("tw-go"); return; }
+      var caret = document.createElement("span"); caret.className = "tw-caret"; caret.setAttribute("aria-hidden", "true");
+      nodes.forEach(function (o) {
+        o.rest = document.createElement("span"); o.rest.className = "tw-rest"; o.rest.setAttribute("aria-hidden", "true");
+        o.rest.textContent = o.full; o.node.nodeValue = "";
+        o.node.parentNode.insertBefore(o.rest, o.node.nextSibling);
+      });
+      h.setAttribute("aria-label", nodes.map(function (o) { return o.full; }).join(""));
+      h.classList.add("tw-go", "tw-typing");
+      var job = { done: false };
+      var finish = function () {
+        if (job.done) return; job.done = true;
+        nodes.forEach(function (o) { o.node.nodeValue = o.full; if (o.rest.parentNode) o.rest.parentNode.removeChild(o.rest); });
+        h.removeAttribute("aria-label"); h.classList.remove("tw-typing");
+        setTimeout(function () { if (caret.parentNode) caret.parentNode.removeChild(caret); }, 1400);
+      };
+      job.finish = finish; typing.push(job);
+      var speed = Math.max(18, Math.min(48, 1500 / total)), i = 0, k = 0, last = null, acc = 0;
+      var step = function (t) {
+        if (job.done) return;
+        if (last === null) last = t;
+        acc += t - last; last = t;
+        while (acc >= speed && k < nodes.length) {
+          acc -= speed;
+          var o = nodes[k]; i++;
+          o.node.nodeValue = o.full.slice(0, i); o.rest.textContent = o.full.slice(i);
+          o.rest.parentNode.insertBefore(caret, o.rest);
+          if (i >= o.full.length) { k++; i = 0; }
+        }
+        if (k >= nodes.length) finish(); else requestAnimationFrame(step);
+      };
+      nodes[0].rest.parentNode.insertBefore(caret, nodes[0].rest);
+      setTimeout(function () { requestAnimationFrame(step); }, 120);
+    };
+    // Si se cambia de idioma a mitad de la escritura, el título se completa al instante antes de traducirse
+    document.addEventListener("click", function (e) {
+      if (e.target.closest && e.target.closest("[data-lang-toggle]")) typing.forEach(function (jb) { jb.finish(); });
+    }, true);
+    var twIO = new IntersectionObserver(function (es) {
+      es.forEach(function (e) {
+        if (!e.isIntersecting) return;
+        var h = e.target;
+        // El título de la portada espera a que termine la intro del logo
+        if (h.closest(".hero") && root.classList.contains("has-intro") && !root.classList.contains("intro-done")) return;
+        twIO.unobserve(h); typeTitle(h);
+      });
+    }, { threshold: 0.3, rootMargin: "0px 0px -6% 0px" });
+    $$(".hero h1, .page-hero h1, main h2").forEach(function (h) { twIO.observe(h); });
+    // Re-revisa el título de la portada cuando termina la intro
+    if (window.MutationObserver) new MutationObserver(function () {
+      if (root.classList.contains("intro-done")) $$(".hero h1:not(.tw-go)").forEach(function (h) { twIO.unobserve(h); twIO.observe(h); });
+    }).observe(root, { attributes: true, attributeFilter: ["class"] });
+  }
+
   /* ---------------- Intro de la portada: logo grande y transición con el scroll ---------------- */
   var intro = $("#intro");
   if (intro) {
