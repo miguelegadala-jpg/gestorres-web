@@ -962,3 +962,6 @@ main, .site-footer { transition: opacity .2s ease, transform .2s ease; }
 /* Franja detrás del nombre cuando ya está arriba (los edificios pasan por detrás) */
 .intro-band { position: fixed; left: 0; right: 0; top: 0; height: var(--header-h); opacity: 0; pointer-events: none;
   background: rgba(248,250,252,.86); -webkit-backdrop-filter: blur(14px); backdrop-filter: blur(14px); box-shadow: 0 6px 24px rgba(24,32,63,.06); }
+
+/* Navegación interna hacia la portada: sin intro */
+.no-intro .intro { display: none !important; }

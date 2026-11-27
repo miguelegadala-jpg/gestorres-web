@@ -34,6 +34,7 @@ full = f'''<!doctype html>
 {fonts}
 <link rel="preload" as="image" href="img/logo-gestorres.svg">
 <link rel="stylesheet" href="css/styles.css?v={V}">
+<script>/* Si se llega desde otra página del sitio, la intro del logo no se pinta ni un instante */try{{if(sessionStorage.getItem("gt-transition")==="1"||(location.hash&&location.hash!=="#intro"))document.documentElement.classList.add("no-intro")}}catch(e){{}}</script>
 </head>
 <body>
 {body}
